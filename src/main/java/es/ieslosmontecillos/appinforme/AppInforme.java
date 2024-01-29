@@ -1,24 +1,16 @@
 package es.ieslosmontecillos.appinforme;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
 import net.sf.jasperreports.engine.JRException;
@@ -36,28 +28,22 @@ public class AppInforme extends Application {
         // establecemos la conexion con la BD
         conectaBD();
         // creamos la escena
-        TextField tituloIntro = new TextField("nº producto");
-        Button btn = new Button();
-        btn.setText("Informe");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("appinforme.fxml"));
+            Parent root = loader.load();
 
-        VBox root = new VBox();
-        root.getChildren().addAll(tituloIntro, btn);
 
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
+            //obtenemos el controlador y establecemos al conexion
 
-                generaInforme(tituloIntro);
-                System.out.println("Generando informe");
+            Scene scene = new Scene(root, 600, 400);
 
-            }
-        });
+            primaryStage.setTitle("Aplicacion de informes");
+            primaryStage.setScene(scene);
+            primaryStage.show();
 
-        Scene scene = new Scene(root, 300, 250);
-
-        primaryStage.setTitle("Obtener informe");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -87,13 +73,11 @@ public class AppInforme extends Application {
         }
     }
 
-    private void generaInforme(TextField tintro) {
+    private void generaInforme(String nombreInforme) {
         try {
-            JasperReport jr = (JasperReport)JRLoader.loadObject(getClass().getResource("PedidosProd.jasper"));
+            JasperReport jr = (JasperReport)JRLoader.loadObject(getClass().getResource(nombreInforme));
             //Map de parámetros
-            Map parametros = new HashMap();
-            int nproducto = Integer.valueOf(tintro.getText());
-            parametros.put("ParamProducto", nproducto);
+            Map<String, Object> parametros = new HashMap<>();
 
             JasperPrint jp = (JasperPrint) JasperFillManager.fillReport(jr, parametros, conexion);
             JasperViewer.viewReport(jp);
@@ -104,7 +88,21 @@ public class AppInforme extends Application {
     }
 
 
+    public void generarListadoFacturas(ActionEvent actionEvent) {
+        generaInforme("facturas.jasper");
+    }
 
+    public void generarVentasTotales(ActionEvent actionEvent) {
+        generaInforme("ventas_totales.jasper");
+    }
+
+    public void generarFacturasPorCliente(ActionEvent actionEvent) {
+        //generaInforme();
+    }
+
+    public void generarSubinformeListadoFacturas(ActionEvent actionEvent) {
+        //generaInforme();
+    }
 }
 
 
