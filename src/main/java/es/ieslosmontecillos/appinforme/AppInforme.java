@@ -95,14 +95,15 @@ public class AppInforme extends Application {
             int nproducto = Integer.valueOf(tintro.getText());
             parametros.put("ParamProducto", nproducto);
 
-            JasperPrint jp = (JasperPrint) JasperFillManager.fillReport(jr,
-                    parametros, conexion);
+            JasperPrint jp = (JasperPrint) JasperFillManager.fillReport(jr, parametros, conexion);
             JasperViewer.viewReport(jp);
         } catch (JRException ex) {
             System.out.println("Error al recuperar el jasper");
             JOptionPane.showMessageDialog(null, ex);
         }
     }
+
+
 
 }
 
