@@ -1,5 +1,7 @@
 package es.ieslosmontecillos.appinforme;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,17 +13,22 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.view.JasperViewer;
 
 public class AppInforme extends Application {
     public static Connection conexion = null;
+    public TextField clienteIdField;
 
     @Override
     public void start(Stage primaryStage) {
@@ -79,29 +86,101 @@ public class AppInforme extends Application {
             //Map de parámetros
             Map<String, Object> parametros = new HashMap<>();
 
+            //Cargar subInforme
+            JasperReport subreport = (JasperReport) JRLoader.loadObject(new File("C://Users/Usuario/IdeaProjects/AppInforme/src/main/resources/es/ieslosmontecillos/appinforme/Subinforme_Documento.jasper"));
+
+
+
             JasperPrint jp = (JasperPrint) JasperFillManager.fillReport(jr, parametros, conexion);
             JasperViewer.viewReport(jp);
-        } catch (JRException ex) {
-            System.out.println("Error al recuperar el jasper");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("Error general al recuperar el informe");
             JOptionPane.showMessageDialog(null, ex);
         }
+
     }
 
 
     public void generarListadoFacturas(ActionEvent actionEvent) {
-        generaInforme("facturas.jasper");
+        try{
+            generaInforme("facturas.jasper");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void generarVentasTotales(ActionEvent actionEvent) {
-        generaInforme("ventas_totales.jasper");
+        try{
+            generaInforme("Venta_Totales.jasper");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void generarFacturasPorCliente(ActionEvent actionEvent) {
-        //generaInforme();
+        //mostrar la ventana para poder ingresar el dni del cliente
+        mostrarVentanaId();
+    }
+
+    private void mostrarVentanaId() {
+        try{
+            //cargamos la ventana emergente
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("ventanaID.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root);
+
+            Stage stage = new Stage();
+            stage.setTitle("Ingresa ID");
+            stage.setScene(scene);
+
+            VentanaIdController controller = loader.getController();
+            controller.initData(this, conexion);
+
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void generarSubinformeListadoFacturas(ActionEvent actionEvent) {
-        //generaInforme();
+        try{
+            generaInforme("SubInforme_Listado_Facturas.jasper");
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+    public void generarFacturaPorClienteConId(String clienteId) {
+        if (clienteId != null && !clienteId.isEmpty()) {
+            try {
+                // Nombre del informe que generará la factura por cliente
+                String nombreInforme = "facturas_por_cliente.jasper";
+
+                // Cargar el informe y parámetros
+                JasperReport jr = (JasperReport) JRLoader.loadObject(getClass().getResource(nombreInforme));
+                Map<String, Object> parametros = new HashMap<>();
+                parametros.put("P_CLIENTE_ID", clienteId);
+
+                // Generar e imprimir el informe
+                JasperPrint jp = JasperFillManager.fillReport(jr, parametros, conexion);
+                JasperViewer.viewReport(jp);
+            } catch (JRException ex) {
+                ex.printStackTrace();
+                System.out.println("Error al generar factura por cliente");
+                JOptionPane.showMessageDialog(null, ex);
+            }
+        } else {
+            // Mostrar un mensaje indicando que el ID del cliente es obligatorio
+            JOptionPane.showMessageDialog(null, "Debe ingresar el ID del cliente.");
+        }
     }
 }
 
