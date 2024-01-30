@@ -145,7 +145,15 @@ public class AppInforme extends Application {
 
     public void generarSubinformeListadoFacturas(ActionEvent actionEvent) {
         try {
-            generaInforme("SunInforme_Listado_Facturas_2.jasper");
+            JasperReport jr = (JasperReport) JRLoader.loadObject(AppInforme.class.getResource("SubInforme_Listado_Facturas.jasper"));
+            JasperReport jsr = (JasperReport) JRLoader.loadObject(AppInforme.class.getResource("Subinforme_Documento.jasper"));
+            //Map de parámetros
+            Map parametros = new HashMap();
+            parametros.put("subReportParameter", jsr);
+            //Ya tenemos los datos para instanciar un objeto JasperPrint que permite ver,
+            //imprimir o exportar a otros formatos
+            JasperPrint jp = (JasperPrint) JasperFillManager.fillReport(jr, parametros, conexion);
+            JasperViewer.viewReport(jp, false);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
