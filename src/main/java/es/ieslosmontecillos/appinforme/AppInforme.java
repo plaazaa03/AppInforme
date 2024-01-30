@@ -85,25 +85,25 @@ public class AppInforme extends Application {
 
     private void generaInforme(String nombreInforme) {
         try {
-            JasperReport jr = (JasperReport)JRLoader.loadObject(getClass().getResource(nombreInforme));
+            JasperReport jr = (JasperReport) JRLoader.loadObject(getClass().getResource(nombreInforme));
             //Map de parámetros
             Map parametros = new HashMap<>();
 
 
+
             String textField = textNumCliente.getText();
-            if (textField == ""){
+            if (textField == "") {
                 System.err.println("No se ha introducido ningun parametro");
-            }else{
+            } else {
                 int clientes = Integer.valueOf(textField);
                 parametros.put("NUM_CLIENTE", clientes);
             }
 
 
-
             //Cargar subInforme
-           // JasperReport jsr = (JasperReport) JRLoader.loadObject(new File("C://Users/Usuario/IdeaProjects/AppInforme/src/main/resources/es/ieslosmontecillos/appinforme/Subinforme_Documento.jasper"));
+            // JasperReport jsr = (JasperReport) JRLoader.loadObject(new File("C://Users/Usuario/IdeaProjects/AppInforme/src/main/resources/es/ieslosmontecillos/appinforme/Subinforme_Documento.jasper"));
             JasperReport jsr = (JasperReport) JRLoader.loadObject(getClass().getResource("Subinforme_Documento.jasper"));
-
+            parametros.put("subReportParameter",jsr);
 
             JasperPrint jp = (JasperPrint) JasperFillManager.fillReport(jr, parametros, conexion);
             JasperViewer.viewReport(jp, false);
@@ -117,7 +117,7 @@ public class AppInforme extends Application {
 
 
     public void generarListadoFacturas(ActionEvent actionEvent) {
-        try{
+        try {
             generaInforme("facturas.jasper");
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -125,7 +125,7 @@ public class AppInforme extends Application {
     }
 
     public void generarVentasTotales(ActionEvent actionEvent) {
-        try{
+        try {
             generaInforme("Venta_Totales.jasper");
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -137,14 +137,18 @@ public class AppInforme extends Application {
 
         try {
             generaInforme("facturas_por_cliente.jasper");
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
-    }
+        }
 
     }
 
     public void generarSubinformeListadoFacturas(ActionEvent actionEvent) {
-
+        try {
+            generaInforme("SunInforme_Listado_Facturas_2.jasper");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
